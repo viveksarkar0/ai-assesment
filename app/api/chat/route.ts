@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { getWeatherData } from "@/lib/api/weather";
+import { getStockData } from "@/lib/api/stocks";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -52,7 +53,6 @@ export async function POST(req: Request) {
         };
         response = `Sure! Here's what the weather looks like in ${weatherData.city}, ${weatherData.country} right now:`;
       } catch (error) {
-        console.error("Weather API error:", error);
         toolResult = {
           toolName: "getWeather",
           args: { location },
@@ -63,10 +63,8 @@ export async function POST(req: Request) {
             weather: [
               { main: "Unknown", description: "weather data unavailable" },
             ],
-            wind: { speed: "N/A" },
           },
         };
-        response = `Hmm, I'm having trouble getting the weather info for ${location} right now. Could you try asking again in a moment?`;
       }
     }
     // Check for F1 requests
@@ -221,22 +219,33 @@ export async function POST(req: Request) {
       lastMessage.toLowerCase().includes("price")
     ) {
       const symbol = extractStockSymbol(lastMessage) || "AAPL";
-      toolResult = {
-        toolName: "getStockPrice",
-        args: { symbol },
-        result: {
-          results: [
-            {
-              c: 150.25,
-              h: 152.1,
-              l: 149.8,
-              o: 151.0,
-              v: 45000000,
-            },
-          ],
-        },
-      };
-      response = `Here's the stock information for ${symbol}:`;
+      try {
+        const stockData = await getStockData(symbol);
+        toolResult = {
+          toolName: "getStockPrice",
+          args: { symbol },
+          result: stockData,
+        };
+        response = `Here's the current stock information for ${symbol}:`;
+      } catch (error) {
+        toolResult = {
+          toolName: "getStockPrice",
+          args: { symbol },
+          result: {
+            symbol: symbol.toUpperCase(),
+            price: "Data Unavailable",
+            change: "0.00",
+            changePercent: "0.00%",
+            volume: "0",
+            high: "Data Unavailable",
+            low: "Data Unavailable",
+            open: "Data Unavailable",
+            previousClose: "Data Unavailable",
+            interval: "daily",
+          },
+        };
+        response = `Sorry, I couldn't retrieve stock data for ${symbol} right now. Please try again later.`;
+      }
     } else {
       // Handle location corrections first (only if previous message was about weather)
       const correctedLocation = extractLocationCorrection(
@@ -271,7 +280,6 @@ export async function POST(req: Request) {
           };
           response = `Got it! You meant ${weatherData.city}, ${weatherData.country}. Here's what the weather is like there:`;
         } catch (error) {
-          console.error("Weather API error:", error);
           response = `I'm having trouble getting the weather info for ${correctedLocation} right now. Mind trying again?`;
         }
       }
@@ -410,7 +418,6 @@ Is there something specific you'd like me to help you learn about or find inform
       },
     });
   } catch (error) {
-    console.error("Chat error:", error);
     return new Response("Sorry, I encountered an error. Please try again.", {
       headers: { "Content-Type": "text/plain" },
     });

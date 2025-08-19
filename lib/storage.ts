@@ -35,26 +35,27 @@ let chats: Chat[] = [];
 let messages: Message[] = [];
 
 // Utility functions
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateId = () =>
+  `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 const saveToLocalStorage = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
-      localStorage.setItem('chat-users', JSON.stringify(users));
-      localStorage.setItem('chat-chats', JSON.stringify(chats));
-      localStorage.setItem('chat-messages', JSON.stringify(messages));
+      localStorage.setItem("chat-users", JSON.stringify(users));
+      localStorage.setItem("chat-chats", JSON.stringify(chats));
+      localStorage.setItem("chat-messages", JSON.stringify(messages));
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
+      // Failed to save to localStorage - silently ignore
     }
   }
 };
 
 const loadFromLocalStorage = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
-      const storedUsers = localStorage.getItem('chat-users');
-      const storedChats = localStorage.getItem('chat-chats');
-      const storedMessages = localStorage.getItem('chat-messages');
+      const storedUsers = localStorage.getItem("chat-users");
+      const storedChats = localStorage.getItem("chat-chats");
+      const storedMessages = localStorage.getItem("chat-messages");
 
       if (storedUsers) {
         users = JSON.parse(storedUsers).map((user: any) => ({
@@ -79,7 +80,7 @@ const loadFromLocalStorage = () => {
         }));
       }
     } catch (error) {
-      console.warn('Failed to load from localStorage:', error);
+      // Failed to load from localStorage - silently ignore
     }
   }
 };
@@ -89,8 +90,10 @@ loadFromLocalStorage();
 
 export const LocalStorage = {
   // User operations
-  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const existingUser = users.find(u => u.email === userData.email);
+  async createUser(
+    userData: Omit<User, "id" | "createdAt" | "updatedAt">,
+  ): Promise<User> {
+    const existingUser = users.find((u) => u.email === userData.email);
     if (existingUser) {
       return existingUser;
     }
@@ -108,11 +111,14 @@ export const LocalStorage = {
   },
 
   async getUserByEmail(email: string): Promise<User | null> {
-    return users.find(u => u.email === email) || null;
+    return users.find((u) => u.email === email) || null;
   },
 
-  async updateUser(id: string, updates: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
-    const userIndex = users.findIndex(u => u.id === id);
+  async updateUser(
+    id: string,
+    updates: Partial<Omit<User, "id" | "createdAt">>,
+  ): Promise<User | null> {
+    const userIndex = users.findIndex((u) => u.id === id);
     if (userIndex === -1) return null;
 
     users[userIndex] = {
@@ -142,16 +148,19 @@ export const LocalStorage = {
 
   async getChatsByUserId(userId: string): Promise<Chat[]> {
     return chats
-      .filter(c => c.userId === userId)
+      .filter((c) => c.userId === userId)
       .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   },
 
   async getChatById(id: string): Promise<Chat | null> {
-    return chats.find(c => c.id === id) || null;
+    return chats.find((c) => c.id === id) || null;
   },
 
-  async updateChat(id: string, updates: Partial<Omit<Chat, 'id' | 'userId' | 'createdAt'>>): Promise<Chat | null> {
-    const chatIndex = chats.findIndex(c => c.id === id);
+  async updateChat(
+    id: string,
+    updates: Partial<Omit<Chat, "id" | "userId" | "createdAt">>,
+  ): Promise<Chat | null> {
+    const chatIndex = chats.findIndex((c) => c.id === id);
     if (chatIndex === -1) return null;
 
     chats[chatIndex] = {
@@ -165,19 +174,21 @@ export const LocalStorage = {
   },
 
   async deleteChat(id: string): Promise<boolean> {
-    const chatIndex = chats.findIndex(c => c.id === id);
+    const chatIndex = chats.findIndex((c) => c.id === id);
     if (chatIndex === -1) return false;
 
     // Delete chat and associated messages
     chats.splice(chatIndex, 1);
-    messages = messages.filter(m => m.chatId !== id);
+    messages = messages.filter((m) => m.chatId !== id);
 
     saveToLocalStorage();
     return true;
   },
 
   // Message operations
-  async createMessage(messageData: Omit<Message, 'id' | 'createdAt'>): Promise<Message> {
+  async createMessage(
+    messageData: Omit<Message, "id" | "createdAt">,
+  ): Promise<Message> {
     const message: Message = {
       id: generateId(),
       ...messageData,
@@ -187,7 +198,7 @@ export const LocalStorage = {
     messages.push(message);
 
     // Update chat's updatedAt timestamp
-    const chatIndex = chats.findIndex(c => c.id === messageData.chatId);
+    const chatIndex = chats.findIndex((c) => c.id === messageData.chatId);
     if (chatIndex !== -1) {
       chats[chatIndex].updatedAt = new Date();
     }
@@ -198,12 +209,12 @@ export const LocalStorage = {
 
   async getMessagesByChatId(chatId: string): Promise<Message[]> {
     return messages
-      .filter(m => m.chatId === chatId)
+      .filter((m) => m.chatId === chatId)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   },
 
   async deleteMessage(id: string): Promise<boolean> {
-    const messageIndex = messages.findIndex(m => m.id === id);
+    const messageIndex = messages.findIndex((m) => m.id === id);
     if (messageIndex === -1) return false;
 
     messages.splice(messageIndex, 1);
@@ -217,18 +228,22 @@ export const LocalStorage = {
     chats = [];
     messages = [];
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem('chat-users');
-        localStorage.removeItem('chat-chats');
-        localStorage.removeItem('chat-messages');
+        localStorage.removeItem("chat-users");
+        localStorage.removeItem("chat-chats");
+        localStorage.removeItem("chat-messages");
       } catch (error) {
-        console.warn('Failed to clear localStorage:', error);
+        // Failed to clear localStorage - silently ignore
       }
     }
   },
 
-  async getStats(): Promise<{ userCount: number; chatCount: number; messageCount: number }> {
+  async getStats(): Promise<{
+    userCount: number;
+    chatCount: number;
+    messageCount: number;
+  }> {
     return {
       userCount: users.length,
       chatCount: chats.length,
@@ -237,7 +252,11 @@ export const LocalStorage = {
   },
 
   // Export/Import functions for data portability
-  async exportData(): Promise<{ users: User[]; chats: Chat[]; messages: Message[] }> {
+  async exportData(): Promise<{
+    users: User[];
+    chats: Chat[];
+    messages: Message[];
+  }> {
     return {
       users: JSON.parse(JSON.stringify(users)),
       chats: JSON.parse(JSON.stringify(chats)),
@@ -245,9 +264,13 @@ export const LocalStorage = {
     };
   },
 
-  async importData(data: { users?: User[]; chats?: Chat[]; messages?: Message[] }): Promise<void> {
+  async importData(data: {
+    users?: User[];
+    chats?: Chat[];
+    messages?: Message[];
+  }): Promise<void> {
     if (data.users) {
-      users = data.users.map(user => ({
+      users = data.users.map((user) => ({
         ...user,
         createdAt: new Date(user.createdAt),
         updatedAt: new Date(user.updatedAt),
@@ -255,7 +278,7 @@ export const LocalStorage = {
     }
 
     if (data.chats) {
-      chats = data.chats.map(chat => ({
+      chats = data.chats.map((chat) => ({
         ...chat,
         createdAt: new Date(chat.createdAt),
         updatedAt: new Date(chat.updatedAt),
@@ -263,7 +286,7 @@ export const LocalStorage = {
     }
 
     if (data.messages) {
-      messages = data.messages.map(message => ({
+      messages = data.messages.map((message) => ({
         ...message,
         createdAt: new Date(message.createdAt),
       }));
@@ -274,7 +297,7 @@ export const LocalStorage = {
 };
 
 // Auto-save to localStorage every 30 seconds
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   setInterval(saveToLocalStorage, 30000);
 }
 

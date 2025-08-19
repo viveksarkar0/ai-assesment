@@ -1,11 +1,12 @@
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { chats, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
       return new Response("Unauthorized", { status: 401 });
@@ -21,8 +22,6 @@ export async function GET() {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("Failed to fetch chats:", error);
-
     if (error.message?.includes("Too many database connection attempts")) {
       return new Response("Database is busy. Please try again in a moment.", {
         status: 503,
@@ -44,7 +43,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
       return new Response("Unauthorized", { status: 401 });
@@ -79,8 +78,6 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("Failed to create chat:", error);
-
     if (error.message?.includes("Too many database connection attempts")) {
       return new Response("Database is busy. Please try again in a moment.", {
         status: 503,

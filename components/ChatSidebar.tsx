@@ -25,9 +25,9 @@ interface Chat {
 
 interface ChatSidebarProps {
   open: boolean;
-  onToggle: () => void;
-  onSelectChat: (chatId: string) => void;
-  onNewChat: () => void;
+  onToggleAction: () => void;
+  onSelectChatAction: (chatId: string) => void;
+  onNewChatAction: () => void;
   currentChatId?: string;
 }
 
@@ -46,9 +46,9 @@ function formatTimeAgo(date: string): string {
 
 export function ChatSidebar({
   open,
-  onToggle,
-  onSelectChat,
-  onNewChat,
+  onToggleAction,
+  onSelectChatAction,
+  onNewChatAction,
   currentChatId,
 }: ChatSidebarProps) {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -83,10 +83,7 @@ export function ChatSidebar({
         try {
           response = await fetch("/api/chats");
         } catch (error) {
-          console.warn(
-            "Database failed, falling back to local storage:",
-            error
-          );
+          // Database failed, falling back to local storage
           setUseLocalStorage(true);
           response = await fetch("/api/chats-local");
         }
@@ -125,10 +122,7 @@ export function ChatSidebar({
             method: "DELETE",
           });
         } catch (error) {
-          console.warn(
-            "Database failed, falling back to local storage:",
-            error
-          );
+          // Database failed, falling back to local storage
           setUseLocalStorage(true);
           response = await fetch(`/api/chats-local/${chatId}`, {
             method: "DELETE",
@@ -141,7 +135,7 @@ export function ChatSidebar({
       }
       setChats(chats.filter((chat) => chat.id !== chatId));
       if (currentChatId === chatId) {
-        onNewChat();
+        onNewChatAction();
       }
       toast.success("Chat deleted", {
         description: "Chat has been successfully deleted.",
@@ -168,7 +162,7 @@ export function ChatSidebar({
     <Card className="w-full h-full border-0 bg-sidebar shadow-lg">
       <CardContent className="p-3 md:p-6 h-full flex flex-col">
         <Button
-          onClick={onNewChat}
+          onClick={onNewChatAction}
           className="w-full mb-4 md:mb-6 h-10 md:h-12 text-sm md:text-base shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-r from-sidebar-primary to-sidebar-primary/90"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -228,7 +222,7 @@ export function ChatSidebar({
                       ? "bg-sidebar-primary/20 border border-sidebar-primary/30"
                       : "hover:bg-sidebar-accent/50"
                   }`}
-                  onClick={() => onSelectChat(chat.id)}
+                  onClick={() => onSelectChatAction(chat.id)}
                 >
                   {/* Left side: chat icon + title */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -263,7 +257,6 @@ export function ChatSidebar({
 
                   {/* Right side: delete button */}
                   <Button
-                  
                     size="icon"
                     className="ml-2 h-7 w-7 text-gray-400 hover:text-destructive hover:bg-destructive/2 bg-red-700"
                     onClick={(e) => deleteChat(chat.id, e)}

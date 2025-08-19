@@ -69,7 +69,7 @@ export default function ChatPage() {
           await saveMessage(currentChatId, "user", userInput);
         }
       } catch (error) {
-        console.error("Failed to save message to database:", error);
+        // Failed to save message to database - continue with chat functionality
       }
     });
   };
@@ -87,7 +87,7 @@ export default function ChatPage() {
       const chatMessages = await loadChat(chatId);
       setMessages(chatMessages);
     } catch (error) {
-      console.error("Failed to load chat:", error);
+      // Failed to load chat - user will see empty chat
     }
   };
 
@@ -120,9 +120,9 @@ export default function ChatPage() {
       >
         <ChatSidebar
           open={sidebarOpen}
-          onToggle={() => setSidebarOpen(!sidebarOpen)}
-          onSelectChat={handleLoadChat}
-          onNewChat={handleNewChat}
+          onToggleAction={() => setSidebarOpen(!sidebarOpen)}
+          onSelectChatAction={handleLoadChat}
+          onNewChatAction={handleNewChat}
           currentChatId={currentChatId || undefined}
         />
       </div>

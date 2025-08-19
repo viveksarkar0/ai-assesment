@@ -155,8 +155,7 @@ export function useChat({ api, onFinish }: UseChatProps) {
             isComplete = true;
             break;
           } catch (e) {
-            console.error("Failed to parse tool result:", e);
-            // If parsing fails, just show the text part
+            // Failed to parse tool result - show text part only
             updateMessage(assistantId, {
               content: textPart,
               isThinking: false,
@@ -185,8 +184,6 @@ export function useChat({ api, onFinish }: UseChatProps) {
         }
       }
     } catch (error) {
-      console.error("Chat error:", error);
-
       // Replace the thinking message with error message
       updateMessage(assistantId, {
         content: "Sorry, I encountered an error. Please try again.",

@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // Simple in-memory storage for development (will reset on server restart)
 interface User {
@@ -33,7 +33,7 @@ const messages = new Map<string, Message>();
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ chatId: string }> }
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -56,22 +56,24 @@ export async function GET(
 
     // Get messages for this chat
     const chatMessages = Array.from(messages.values())
-      .filter(msg => msg.chatId === chatId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .filter((msg) => msg.chatId === chatId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
 
     return Response.json({
       chat,
       messages: chatMessages,
     });
   } catch (error) {
-    console.error("Failed to get chat:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ chatId: string }> }
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -106,7 +108,6 @@ export async function DELETE(
 
     return new Response("Chat deleted", { status: 200 });
   } catch (error) {
-    console.error("Failed to delete chat:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

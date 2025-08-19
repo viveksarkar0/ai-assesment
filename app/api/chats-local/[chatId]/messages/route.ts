@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // Simple in-memory storage for development (will reset on server restart)
 interface User {
@@ -31,11 +31,12 @@ const users = new Map<string, User>();
 const chats = new Map<string, Chat>();
 const messages = new Map<string, Message>();
 
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateId = () =>
+  `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ chatId: string }> }
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -88,14 +89,13 @@ export async function POST(
 
     return Response.json(newMessage, { status: 201 });
   } catch (error) {
-    console.error("Failed to create message:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ chatId: string }> }
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -118,12 +118,14 @@ export async function GET(
 
     // Get messages for this chat
     const chatMessages = Array.from(messages.values())
-      .filter(msg => msg.chatId === chatId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .filter((msg) => msg.chatId === chatId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
 
     return Response.json(chatMessages);
   } catch (error) {
-    console.error("Failed to get messages:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

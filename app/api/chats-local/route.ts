@@ -1,6 +1,6 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { NextRequest } from "next/server"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 
 // Simple in-memory storage for development (will reset on server restart)
 interface User {
@@ -22,7 +22,8 @@ interface Chat {
 const users = new Map<string, User>();
 const chats = new Map<string, Chat>();
 
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateId = () =>
+  `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export async function GET() {
   try {
@@ -32,14 +33,18 @@ export async function GET() {
       return new Response("Unauthorized", { status: 401 });
     }
 
+    const userEmail = session.user.email;
+
     // Get user's chats
     const userChats = Array.from(chats.values())
-      .filter(chat => chat.userId === session.user.email)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      .filter((chat) => chat.userId === userEmail)
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
 
     return Response.json(userChats);
   } catch (error) {
-    console.error("Failed to get chats:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
@@ -86,7 +91,6 @@ export async function POST(req: NextRequest) {
 
     return Response.json(newChat, { status: 201 });
   } catch (error) {
-    console.error("Failed to create chat:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
