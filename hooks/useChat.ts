@@ -56,13 +56,26 @@ export function useChat({ api, onFinish }: UseChatProps) {
       content: input.trim(),
     };
 
-    // Add user message immediately
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
     // Store input and clear immediately for better UX
     const userInput = input.trim();
     setInput("");
+    setIsLoading(true);
+
+    // Add user message immediately
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Create assistant message with thinking state immediately
+    const assistantId = generateId();
+    const assistantMessage: Message = {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+      toolInvocations: [],
+      isThinking: true,
+    };
+
+    // Add assistant thinking message immediately
+    setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       const response = await fetch(api, {
@@ -82,19 +95,7 @@ export function useChat({ api, onFinish }: UseChatProps) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantContent = "";
-
-      // Create assistant message with unique ID
-      const assistantId = generateId();
-      const assistantMessage: Message = {
-        id: assistantId,
-        role: "assistant",
-        content: "",
-        toolInvocations: [],
-        isThinking: true,
-      };
-
-      // Add assistant message immediately
-      setMessages((prev) => [...prev, assistantMessage]);
+      let hasStartedStreaming = false;
 
       // Stream the response
       let isComplete = false;
@@ -107,6 +108,20 @@ export function useChat({ api, onFinish }: UseChatProps) {
 
         const chunk = decoder.decode(value, { stream: true });
         assistantContent += chunk;
+
+        // On first chunk, stop thinking and start showing content
+        if (!hasStartedStreaming && assistantContent.trim()) {
+          hasStartedStreaming = true;
+          updateMessage(assistantId, {
+            content: assistantContent,
+            isThinking: false,
+          });
+        } else if (hasStartedStreaming) {
+          // Continue updating content
+          updateMessage(assistantId, {
+            content: assistantContent,
+          });
+        }
 
         // Check for tool results in the stream
         if (assistantContent.includes("TOOL_RESULT:")) {
@@ -147,17 +162,12 @@ export function useChat({ api, onFinish }: UseChatProps) {
               isThinking: false,
             });
           }
-        } else {
-          // Update with streaming content
-          updateMessage(assistantId, {
-            content: assistantContent,
-            isThinking: false,
-          });
         }
       }
 
       // Handle case where no tool results were found
       if (!assistantContent.includes("TOOL_RESULT:")) {
+        // Make sure thinking is stopped and final content is set
         updateMessage(assistantId, {
           content: assistantContent,
           isThinking: false,
@@ -177,14 +187,12 @@ export function useChat({ api, onFinish }: UseChatProps) {
     } catch (error) {
       console.error("Chat error:", error);
 
-      const errorMessage: Message = {
-        id: generateId(),
-        role: "assistant",
+      // Replace the thinking message with error message
+      updateMessage(assistantId, {
         content: "Sorry, I encountered an error. Please try again.",
+        isThinking: false,
         toolInvocations: [],
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      });
     } finally {
       setIsLoading(false);
     }

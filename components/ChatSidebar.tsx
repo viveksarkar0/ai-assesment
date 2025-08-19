@@ -85,7 +85,7 @@ export function ChatSidebar({
         } catch (error) {
           console.warn(
             "Database failed, falling back to local storage:",
-            error,
+            error
           );
           setUseLocalStorage(true);
           response = await fetch("/api/chats-local");
@@ -127,7 +127,7 @@ export function ChatSidebar({
         } catch (error) {
           console.warn(
             "Database failed, falling back to local storage:",
-            error,
+            error
           );
           setUseLocalStorage(true);
           response = await fetch(`/api/chats-local/${chatId}`, {
@@ -181,7 +181,8 @@ export function ChatSidebar({
           </h3>
         </div>
 
-        <ScrollArea className="flex-1 -mx-1 md:mx-0">
+        {/* ✅ Updated ScrollArea for scrollability & responsiveness */}
+        <ScrollArea className="flex-1 -mx-1 md:mx-0 overflow-y-auto max-h-[calc(100vh-200px)]">
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -222,35 +223,36 @@ export function ChatSidebar({
               {chats.map((chat) => (
                 <div
                   key={chat.id}
-                  className={`group flex items-center justify-between p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                  className={`group flex items-center justify-between p-2 rounded-md cursor-pointer transition-all duration-200 ${
                     currentChatId === chat.id
-                      ? "bg-gradient-to-r from-sidebar-primary/20 to-sidebar-primary/10 border border-sidebar-primary/30 shadow-md"
-                      : "hover:bg-sidebar-accent/50 hover:shadow-md"
+                      ? "bg-sidebar-primary/20 border border-sidebar-primary/30"
+                      : "hover:bg-sidebar-accent/50"
                   }`}
                   onClick={() => onSelectChat(chat.id)}
                 >
-                  <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                  {/* Left side: chat icon + title */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div
-                      className={`w-6 md:w-8 h-6 md:h-8 rounded-md md:rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${
                         currentChatId === chat.id
-                          ? "bg-gradient-to-br from-sidebar-primary/30 to-sidebar-primary/20"
+                          ? "bg-sidebar-primary/30"
                           : "bg-sidebar-accent/30"
                       }`}
                     >
-                      <MessageSquare className="h-3 md:h-4 w-3 md:w-4 text-sidebar-foreground/70" />
+                      <MessageSquare className="h-4 w-4 text-sidebar-foreground/70" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm md:text-base font-medium truncate text-sidebar-foreground">
+                      <p className="text-sm font-medium truncate text-sidebar-foreground">
                         {chat.title}
                       </p>
-                      <div className="flex items-center gap-1 md:gap-2 mt-1">
+                      <div className="flex items-center gap-1 mt-0.5">
                         <p className="text-xs text-sidebar-foreground/60">
                           {formatTimeAgo(chat.updatedAt)}
                         </p>
                         {currentChatId === chat.id && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-sidebar-primary/20 text-sidebar-primary px-1 md:px-2"
+                            className="text-[10px] bg-sidebar-primary/20 text-sidebar-primary px-1"
                           >
                             Active
                           </Badge>
@@ -258,17 +260,19 @@ export function ChatSidebar({
                       </div>
                     </div>
                   </div>
+
+                  {/* Right side: delete button */}
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/20 hover:text-destructive h-6 w-6 md:h-8 md:w-8 p-0"
+                  
+                    size="icon"
+                    className="ml-2 h-7 w-7 text-gray-400 hover:text-destructive hover:bg-destructive/2 bg-red-700"
                     onClick={(e) => deleteChat(chat.id, e)}
                     disabled={deletingChatId === chat.id}
                   >
                     {deletingChatId === chat.id ? (
-                      <RefreshCw className="h-3 md:h-4 w-3 md:w-4 animate-spin" />
+                      <RefreshCw className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Trash2 className="h-3 md:h-4 w-3 md:w-4" />
+                      <Trash2 className="h-4 w-4" />
                     )}
                   </Button>
                 </div>

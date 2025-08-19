@@ -46,29 +46,32 @@ export default function ChatPage() {
     },
   });
 
-  // Handle chat submission with proper state management
-  const handleChatSubmit = async (e: React.FormEvent) => {
+  // Handle chat submission with immediate UI updates
+  const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userInput = input.trim();
 
-    // Handle chat creation and user message saving
-    let chatId = currentChatId;
-    if (!currentChatId) {
-      // Create new chat
-      chatId = await createChat(userInput);
-      if (chatId) {
-        // Save user message to new chat
-        await saveMessage(chatId, "user", userInput);
-      }
-    } else {
-      // Save user message to existing chat
-      await saveMessage(currentChatId, "user", userInput);
-    }
-
-    // Submit to UI (this will handle the AI response)
+    // Submit to UI immediately - this shows user message and starts AI response
     handleSubmit(e);
+
+    // Handle database operations completely in background (fire and forget)
+    Promise.resolve().then(async () => {
+      try {
+        let chatId = currentChatId;
+        if (!currentChatId) {
+          chatId = await createChat(userInput);
+          if (chatId) {
+            await saveMessage(chatId, "user", userInput);
+          }
+        } else {
+          await saveMessage(currentChatId, "user", userInput);
+        }
+      } catch (error) {
+        console.error("Failed to save message to database:", error);
+      }
+    });
   };
 
   // Handle quick action inputs

@@ -55,19 +55,19 @@ export function MessageItem({ message, index = 0 }: MessageItemProps) {
             }`}
           >
             {message.isThinking ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 py-2">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                  <div className="w-2.5 h-2.5 bg-primary/70 rounded-full animate-bounce"></div>
                   <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
+                    className="w-2.5 h-2.5 bg-primary/70 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.15s" }}
                   ></div>
                   <div
-                    className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
+                    className="w-2.5 h-2.5 bg-primary/70 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.3s" }}
                   ></div>
                 </div>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <span className="text-sm text-slate-600 dark:text-slate-400 animate-pulse">
                   Thinking...
                 </span>
               </div>

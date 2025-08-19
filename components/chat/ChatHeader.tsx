@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 interface ChatHeaderProps {
   title?: string;
@@ -55,16 +56,18 @@ export function ChatHeader({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-full"
+                className="h-10 w-20 rounded-full"
               >
                 {session.user.image ? (
                   <img
-                    src={session.user.image}
+                   src={session.user.image}
                     alt={session.user.name || "User"}
-                    className="h-8 w-8 rounded-full"
+                    className="h-10 w-10 rounded-full"
+                    width={20}
+                    height={20}
                   />
                 ) : (
-                  <User className="h-4 w-4" />
+                  <User className="h-4 w-10" />
                 )}
               </Button>
             </DropdownMenuTrigger>

@@ -35,11 +35,11 @@ export function ChatMessages({ messages, onQuickAction }: ChatMessagesProps) {
       </div>
       <div className="space-y-3">
         <h3 className="text-2xl font-bold text-card-foreground">
-          Start a conversation
+          Hey there! Let's chat 👋
         </h3>
         <p className="text-muted-foreground max-w-md text-lg">
-          Ask me about weather conditions, Formula 1 updates, or stock market
-          insights
+          I can help with weather anywhere, F1 updates, stock prices, or just
+          have a friendly conversation about whatever's on your mind!
         </p>
       </div>
       <div className="flex flex-wrap gap-3 justify-center pt-4">
@@ -49,7 +49,7 @@ export function ChatMessages({ messages, onQuickAction }: ChatMessagesProps) {
           className="shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 bg-transparent"
           onClick={() => onQuickAction("What's the weather like in New York?")}
         >
-          🌤️ Weather in NYC
+          🌤️ NYC Weather
         </Button>
         <Button
           variant="outline"
@@ -57,7 +57,7 @@ export function ChatMessages({ messages, onQuickAction }: ChatMessagesProps) {
           className="shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 bg-transparent"
           onClick={() => onQuickAction("Latest F1 race results")}
         >
-          🏎️ F1 Results
+          🏎️ F1 Updates
         </Button>
         <Button
           variant="outline"
@@ -65,7 +65,7 @@ export function ChatMessages({ messages, onQuickAction }: ChatMessagesProps) {
           className="shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 bg-transparent"
           onClick={() => onQuickAction("AAPL stock price")}
         >
-          📈 Stock Price
+          📈 Apple Stock
         </Button>
       </div>
     </div>
